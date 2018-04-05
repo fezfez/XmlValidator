@@ -18,7 +18,7 @@ class XmlValidator
         return $this->errors;
     }
 
-    public function validate($xml, $schema)
+    public function validate($xml, $schema, $schemaSource = XsdSource::FILE)
     {
         if ('' === trim($xml)) {
             throw new \InvalidArgumentException(sprintf('File %s does not contain valid XML, it is empty.', $xml));
@@ -52,8 +52,10 @@ class XmlValidator
             libxml_clear_errors();
 
             $e = null;
-            if (!is_array($schema) && is_file((string) $schema)) {
+            if ($schemaSource === XsdSource::FILE && !\is_array($schema) && \is_file((string) $schema)) {
                 $valid = @$dom->schemaValidate($schema);
+            } elseif ($schemaSource === XsdSource::STRING && \is_string($schema)) {
+                $valid = @$dom->schemaValidateSource($schema);
             } else {
                 libxml_use_internal_errors($internalErrors);
 
